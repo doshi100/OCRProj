@@ -1,4 +1,5 @@
 import cv2
+from cv2 import compare
 import pytesseract
 import numpy as np
 import re
@@ -6,6 +7,33 @@ import random
 from os import listdir
 from os.path import isfile, join
 from pytesseract import Output
+
+def imgShow(source_photos, compare_photos):
+    counter = 0
+    for photo in source_photos:
+        cv2.imshow("{}".format(random.randint(1, 1000)), source_photos[counter]["img_obj"])
+        # cv2.waitKey(0)
+        counter += 1
+    counter = 0
+    for photo2 in compare_photos:
+        cv2.imshow("{}".format(random.randint(1, 1000)), compare_photos[counter]["img_obj"])
+        # cv2.waitKey(0)
+        counter += 1
+
+
+def ImageToData(img_address, is_table):
+    img_data = None
+    if(is_table):
+        img = cv2.imread(img_address)
+        result = OCR_correct(img)
+        img_data = pytesseract.image_to_data(result, output_type=Output.DICT, config='tessedit_char_whitelist=0123456789')
+        img_data["img_obj"] = img
+    else:
+        img = cv2.imread(img_address)
+        img_data = pytesseract.image_to_data(img, output_type=Output.DICT)
+        img_data["img_obj"] = img
+        print(img_data)
+    return img_data
 
 
 def OCR_correct(img):
@@ -66,7 +94,7 @@ def MarkWords(img_sourceList, img_compareList):
         dic = s_imgData
         for number in range(len(dic["text"])):
             if (number != '' and int(float(dic['conf'][number])) > 60):
-                bgr_markingColor = [random.randint(1,150),random.randint(1,150),random.randint(1,150)]
+                bgr_markingColor = [random.randint(1,255),random.randint(1,255),random.randint(1,255)]
                 overlaySource = dic["img_obj"].copy()
                 # counter for going over the cmp pictures Data
                 c_counter = 0
@@ -111,33 +139,36 @@ def MarkWords(img_sourceList, img_compareList):
 # find out how to read 2 images at the same time because i have trouble with that
 
 
-img = cv2.imread('C:\\tesseract\\bigPicture.jpeg')
-img2 = cv2.imread('C:\\tesseract\\green2.png')
-img3 = cv2.imread('C:\\tesseract\\greentable3.png')
-img4 = cv2.imread('C:\\tesseract\\sourceta.png')
+# img = cv2.imread('C:\\tesseract\\bigPicture.jpeg')
+# img2 = cv2.imread('C:\\tesseract\\green2.png')
+# img3 = cv2.imread('C:\\tesseract\\greentable3.png')
+# img4 = cv2.imread('C:\\tesseract\\sourceta.png')
 img_sourceList = []
 img_compareList = []
-result = OCR_correct(img)
-result2 = OCR_correct(img2)
-result3 = OCR_correct(img3)
-result4 = OCR_correct(img4)
+# result = OCR_correct(img)
+# result2 = OCR_correct(img2)
+# result3 = OCR_correct(img3)
+# result4 = OCR_correct(img4)
 # text = pytesseract.image_to_string(result)
 # compNums = re.sub(" +", " ", re.sub("[^0-9]", " ", text)).split()
-img_data = pytesseract.image_to_data(result, output_type=Output.DICT)
-img2_data = pytesseract.image_to_data(result2, output_type=Output.DICT)
-img3_data = pytesseract.image_to_data(result3, output_type=Output.DICT)
-img4_data = pytesseract.image_to_data(result4, output_type=Output.DICT)
-img_data["img_obj"] = img
-img2_data["img_obj"] = img2
-img3_data["img_obj"] = img3
-img4_data["img_obj"] = img4
-img_compareList.append(img_data)
-img_sourceList.append(img2_data)
-img_sourceList.append(img3_data)
-img_sourceList.append(img4_data)
+# img_data = pytesseract.image_to_data(result, output_type=Output.DICT)
+# img2_data = pytesseract.image_to_data(result2, output_type=Output.DICT)
+# img3_data = pytesseract.image_to_data(result3, output_type=Output.DICT)
+# img4_data = pytesseract.image_to_data(result4, output_type=Output.DICT)
+# img_data["img_obj"] = img
+# img2_data["img_obj"] = img2
+# img3_data["img_obj"] = img3
+# img4_data["img_obj"] = img4
+img_compareList.append(ImageToData('C:\\OCRProj\\bigPicture.jpeg', True))
+img_sourceList.append(ImageToData('C:\\OCRProj\\green2.png', True))
+img_sourceList.append(ImageToData('C:\\OCRProj\\greentable3.png', True))
+img_sourceList.append(ImageToData('C:\\OCRProj\\sourceta.png', True))
+img_sourceList.append(ImageToData('C:\\OCRProj\\whatsappImg.png', False))
 MarkWords(img_sourceList, img_compareList)
-cv2.imshow("example", img_data["img_obj"])
-cv2.imshow("example2", img2_data["img_obj"])
-cv2.imshow("example3", img3_data["img_obj"])
-cv2.imshow("example4", img4_data["img_obj"])
+# cv2.imshow("example", img_data["img_obj"])
+# cv2.imshow("example2", img2_data["img_obj"])
+# cv2.imshow("example3", img3_data["img_obj"])
+# cv2.imshow("example4", img4_data["img_obj"])
+imgShow(img_sourceList, img_compareList)
 cv2.waitKey(0)
+
