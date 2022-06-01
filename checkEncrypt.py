@@ -30,11 +30,19 @@ def ImageToData(img_address, is_table):
         img_data["img_obj"] = img
     else:
         img = cv2.imread(img_address)
-        img_data = pytesseract.image_to_data(img, output_type=Output.DICT)
+        img_data = pytesseract.image_to_data(img, output_type=Output.DICT, config=r'-l eng+heb')
+        strip_char(img_data)
         img_data["img_obj"] = img
         print(img_data)
     return img_data
 
+
+# method that strips any string from the numbers list that is not a number for filtering only the numbers from the list 
+def strip_char(img_data):
+    counter = 0
+    for iden_num in img_data["text"]:
+        img_data["text"][counter] = re.sub("[^0-9]", "", iden_num)
+        counter += 1
 
 def OCR_correct(img):
     result = img.copy()
@@ -93,7 +101,7 @@ def MarkWords(img_sourceList, img_compareList):
     for s_imgData in img_sourceList:
         dic = s_imgData
         for number in range(len(dic["text"])):
-            if (number != '' and int(float(dic['conf'][number])) > 60):
+            if (dic["text"][number] != '' and int(float(dic['conf'][number])) > 60):
                 bgr_markingColor = [random.randint(1,255),random.randint(1,255),random.randint(1,255)]
                 overlaySource = dic["img_obj"].copy()
                 # counter for going over the cmp pictures Data
@@ -139,31 +147,14 @@ def MarkWords(img_sourceList, img_compareList):
 # find out how to read 2 images at the same time because i have trouble with that
 
 
-# img = cv2.imread('C:\\tesseract\\bigPicture.jpeg')
-# img2 = cv2.imread('C:\\tesseract\\green2.png')
-# img3 = cv2.imread('C:\\tesseract\\greentable3.png')
-# img4 = cv2.imread('C:\\tesseract\\sourceta.png')
 img_sourceList = []
 img_compareList = []
-# result = OCR_correct(img)
-# result2 = OCR_correct(img2)
-# result3 = OCR_correct(img3)
-# result4 = OCR_correct(img4)
-# text = pytesseract.image_to_string(result)
-# compNums = re.sub(" +", " ", re.sub("[^0-9]", " ", text)).split()
-# img_data = pytesseract.image_to_data(result, output_type=Output.DICT)
-# img2_data = pytesseract.image_to_data(result2, output_type=Output.DICT)
-# img3_data = pytesseract.image_to_data(result3, output_type=Output.DICT)
-# img4_data = pytesseract.image_to_data(result4, output_type=Output.DICT)
-# img_data["img_obj"] = img
-# img2_data["img_obj"] = img2
-# img3_data["img_obj"] = img3
-# img4_data["img_obj"] = img4
 img_compareList.append(ImageToData('C:\\OCRProj\\bigPicture.jpeg', True))
 img_sourceList.append(ImageToData('C:\\OCRProj\\green2.png', True))
 img_sourceList.append(ImageToData('C:\\OCRProj\\greentable3.png', True))
 img_sourceList.append(ImageToData('C:\\OCRProj\\sourceta.png', True))
 img_sourceList.append(ImageToData('C:\\OCRProj\\whatsappImg.png', False))
+img_sourceList.append(ImageToData('C:\\OCRProj\\whatsappImg2.png', False))
 MarkWords(img_sourceList, img_compareList)
 # cv2.imshow("example", img_data["img_obj"])
 # cv2.imshow("example2", img2_data["img_obj"])
