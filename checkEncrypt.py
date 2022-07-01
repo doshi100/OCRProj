@@ -8,8 +8,9 @@ from os import listdir
 from os.path import isfile, join
 from pytesseract import Output
 
+
 class textMarker:
-        
+    # added this class
     def cropPaste(sourceList, compList):
         for dic in sourceList:
             cropped_img = dic["img_obj"]
